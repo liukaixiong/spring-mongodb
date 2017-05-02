@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation="http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd
+          http://www.springframework.org/schema/data/mongo
+         http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+          http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- SpringData类型转换器 -->
+    <mongo:mapping-converter id="mongoConverter">
+        <!-- 单个赋值 -->
+        <!--<mongo:custom-converters>-->
+        <!--<mongo:converter>-->
+        <!--<bean class="com.mongodb.converter.UserInfoReadConverter"/>-->
+        <!--</mongo:converter>-->
+        <!--</mongo:custom-converters>-->
+        <!-- 扫描包赋值 -->
+        <!--<mongo:custom-converters base-package="com.mongodb.converter.*" />-->
+        <mongo:custom-converters base-package="com.mongodb.converter"></mongo:custom-converters>
+    </mongo:mapping-converter>
+
+    <!-- 转换器 -->
+    <!--<bean id="timestampConverter" class="com.mongodb.utils.TimestampConverter">-->
+    <!--<property name="converter" ref="mongoConverter"/>-->
+    <!--</bean>-->
+
+    <!--<mongo:mongo host="${mongo.host}" port="${mongo.port}">-->
+    <!--<mongo:options-->
+    <!--connections-per-host="${mongo.connectionsPerHost}"-->
+    <!--threads-allowed-to-block-for-connection-multiplier="${mongo.threadsAllowedToBlockForConnectionMultiplier}"-->
+    <!--connect-timeout="${mongo.connectTimeout}"-->
+    <!--max-wait-time="${mongo.maxWaitTime}"-->
+    <!--auto-connect-retry="${mongo.autoConnectRetry}"-->
+    <!--socket-keep-alive="${mongo.socketKeepAlive}"-->
+    <!--socket-timeout="${mongo.socketTimeout}"-->
+    <!--slave-ok="${mongo.slaveOk}"-->
+    <!--write-number="${mongo.writeNumber}"-->
+    <!--write-timeout="${mongo.writeTimeout}"-->
+    <!--write-fsync="${mongo.writeFsync}"/>-->
+    <!--</mongo:mongo>-->
+    <!--" host="${mongo.host}" port="${mongo.port}"-->
+    <mongo:mongo-client replica-set="${mongo.replica.host}" credentials="" id="mongo">
+        <mongo:client-options write-concern="SAFE" connections-per-host="8"
+                              threads-allowed-to-block-for-connection-multiplier="4"
+                              connect-timeout="${mongo.connectTimeout}"
+                              max-wait-time="1500"
+                              socket-keep-alive="true"
+                              socket-timeout="1500"/>
+
+    </mongo:mongo-client>
+
+    <mongo:db-factory id="mongoDbFactory" mongo-ref="mongo"/>
+    <mongo:db-factory id="demo" dbname="demo" mongo-ref="mongo"/>
+
+    <!--<mongo:db-factory id="anotherMongoDbFactory"-->
+    <!--host="localhost"-->
+    <!--port="27017"-->
+    <!--dbname="database"-->
+    <!--username="joe"-->
+    <!--password="secret"-->
+    <!--authentication-dbname="admin"-->
+    <!--/>-->
+    <!--<mongo:db-factory id="mongoDbFactory" dbname="${mongo.dbname}" mongo-ref="mongo"/>-->
+
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
+        <constructor-arg name="mongoConverter" ref="mongoConverter"/>
+    </bean>
+
+</beans>
